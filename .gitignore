@@ -1,0 +1,5 @@
+# Build output only — lib/ is intentionally tracked (committed JARs required for Mode-3 fallback)
+build/
+dist/
+*.class
+*.tmp

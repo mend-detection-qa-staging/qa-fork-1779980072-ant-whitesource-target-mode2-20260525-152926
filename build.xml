@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ant-whitesource-target-mode2 — Probe: G6.a coverage (Mode 2 WhitesourceXmlAntTask path)
+
+  The <whitesource> target below signals to the Mend bolt-4 SCM scanner that Mode 2
+  should be attempted.  At scan time the scanner:
+    1. Injects WhitesourceXmlAntTask into the Ant project runtime.
+    2. Executes the "whitesource" target.
+    3. Parses <module> elements; each <path> reference becomes a separate Mend project.
+    4. Fingerprints (SHA1) each JAR found on the resolved path.
+
+  Running "ant whitesource" locally WILL FAIL with "Problem: failed to create task or
+  type whitesource" because WhitesourceXmlAntTask is not in the local classpath.
+  That failure is expected — the task only exists at Mend scan time.
+
+  Fallback: if Mode 2 does not fire (e.g. scanner version mismatch), the scanner
+  falls through to Mode 3 (default path scan across lib/**), which still detects all
+  six JARs but as a single flat list rather than two separate modules.
+-->
+<project name="ant-whitesource-target-mode2" default="whitesource" basedir=".">
+
+    <!-- Path references for each module.  The scanner resolves these before
+         executing the <whitesource> target. -->
+    <path id="module-a.path">
+        <fileset dir="${basedir}/lib/module-a" includes="*.jar"/>
+    </path>
+
+    <path id="module-b.path">
+        <fileset dir="${basedir}/lib/module-b" includes="*.jar"/>
+    </path>
+
+    <!--
+      <whitesource> target — the Mode 2 entry point.
+      WhitesourceXmlAntTask is injected by the Mend scanner at runtime; locally
+      this target produces "task whitesource not found" and is safe to ignore.
+    -->
+    <target name="whitesource"
+            description="Mend Mode-2 module declarations (requires WhitesourceXmlAntTask at scan time)">
+        <module name="module-a" path="module-a.path"/>
+        <module name="module-b" path="module-b.path"/>
+    </target>
+
+</project>
